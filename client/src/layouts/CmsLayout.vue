@@ -17,9 +17,12 @@
       <!-- Left Navigation -->
       <v-navigation-drawer app permanent>
         <v-list dense>
-          <v-list-item @click="navigateTo('todoList')">
-            <v-list-item-title>Todos</v-list-item-title>
+          <v-list-item v-for="posttype in cmsMenu" :key="posttype.name" @click="navigateTo(posttype.path)">
+            <v-list-item-title>{{ posttype.name }}</v-list-item-title>
           </v-list-item>
+          <!-- <v-list-item @click="navigateTo('fooList')">
+            <v-list-item-title>Foo</v-list-item-title>
+          </v-list-item> -->
         </v-list>
       </v-navigation-drawer>
   
@@ -32,8 +35,14 @@
   
   <script>
   import store from '../store';
+  import cmsMenu from '../views/Posttype/cmsMenu'
   
   export default {
+    data: () => {
+      return {
+        cmsMenu
+      }
+    },  
     computed: {
       username() {
         return store.getters.currentUser ? store.getters.currentUser.username : '';
@@ -43,10 +52,10 @@
       logout() {
         this.$router.push(`/logout`);
       },
-      navigateTo(routeName) {
+      navigateTo(path) {
         // Implement navigation to different views based on the left navigation items.
         // You can use Vue Router for this purpose.
-        this.$router.push({ name: routeName });
+        this.$router.push(path);
       },
     },
   };

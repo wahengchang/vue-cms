@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const CategoryModel = require('./model/Category');
-const { createOrGetCategoryByIdAndName } = require('../../utils/modelUtils')
+const { createOrGetCategoryByIdAndName } = require('../../../utils/modelUtils')
 
 router.post('', async (req, res) => {
     const { name } = req.body;

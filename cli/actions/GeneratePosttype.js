@@ -61,13 +61,13 @@ const generatePostType = async () => {
     return
   }
 
-  const templateFolder = path.resolve(__dirname, '../template')
-  const targetDestination = path.resolve(__dirname, './server/routers/')
+  const templateFolder = path.resolve(__dirname, '../template/Posttype')
+  const targetDestination = path.resolve(__dirname, `../../server/routers/posttype/${posttypeName}`)
 
-  console.log('targetDestination: ' , targetDestination)
+  fs.mkdirSync(targetDestination);
 
   // deleteFolderIfExistsSync(targetDestination)
-  // await copyFiles(templateFolder, targetDestination);
+  await copyFiles(templateFolder, targetDestination);
 
   await backToMainMenu();
 };

@@ -4,7 +4,7 @@
       <v-col>
         <v-row class="mb-2">
           <v-col>
-            <h1>Todos List</h1>
+            <h1>{{POSTYPE_NAME}} List</h1>
           </v-col>
         </v-row>
         <v-row class="mb-2">
@@ -25,19 +25,19 @@
           </v-btn>
           <v-spacer></v-spacer> <!-- This spacer will push the "Create" button to the right -->
 
-          <router-link to="/todos/create">
+          <router-link :to="`/${API_PATH_SLUG}/create`">
             <v-btn @click="navigateToCreate" color="red" fab dark>
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </router-link>
         </v-row>
         <v-row class="mb-2">
-          <v-data-table :headers="headers" :items="filteredTodos">
+          <v-data-table :headers="headers" :items="filteredPosttype">
             <template v-slot:[`item.actions`]="{ item }">
-              <v-btn @click="editTodo(item._id)" icon color="blue">
+              <v-btn @click="editPosttype(item._id)" icon color="blue">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn @click="deleteTodo(item._id)" icon color="red">
+              <v-btn @click="deletePosttype(item._id)" icon color="red">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -57,17 +57,19 @@
 
 <script>
 import axios from 'axios'
+import {POSTYPE_NAME, API_PATH_SLUG} from './const'
 export default {
   data() {
     return {
-      todos: [], // Array to store all todos
-      categories: [], // Array to store categories
-      filteredTodos: [], // Array to store filtered todos
-      sortField: '', // Field to sort todos by
-      sortAsc: true, // Sort order (ascending/descending)
-      currentPage: 1, // Current page number
-      pageSize: 10, // Number of todos per page
-
+      posttypes: [], 
+      categories: [], 
+      filteredPosttype: [], 
+      sortField: '', 
+      sortAsc: true, 
+      currentPage: 1, 
+      pageSize: 10, 
+      POSTYPE_NAME,
+      API_PATH_SLUG,
       headers: [
         { title: 'Title', key: 'title' },
         { title: 'Category', key: 'category.value' },
@@ -79,14 +81,14 @@ export default {
   },
   async created() {
     await this.fetchCategories();
-    await this.fetchTodos();
+    await this.fetchPosttypes();
   },
   methods: {
-    async fetchTodos() {
-      const res = await axios.get('/apis/todos')
-      this.todos = [...res.data.Todos]
-      const _filteredTodos = [...this.todos]
-      this.filteredTodos = _filteredTodos.map(item => {
+    async fetchPosttypes() {
+      const res = await axios.get(`/apis/${API_PATH_SLUG}`)
+      this.posttypes = [...res.data[`${POSTYPE_NAME}s`]]
+      const _filteredPosttype = [...this.posttypes]
+      this.filteredPosttype = _filteredPosttype.map(item => {
         const { _id, title, category, createdAt } = item
         const _category = {
           id: category,
@@ -101,37 +103,30 @@ export default {
       })
     },
     async fetchCategories() {
-      const res = await axios.get('/apis/todos/category/all')
+      const res = await axios.get(`/apis/${API_PATH_SLUG}/category/all`)
       this.categories = [...res.data.allCategory]
     },
     filterByCategory(categoryId) {
-      console.log('-=-=-=-= categoryId: ', categoryId)
       this.$router.push({
-        path: `/todos`,
+        path: `/${POSTYPE_NAME}`,
         query: {category: categoryId}
       });
     },
     sortTodos(field) {
       console.log('sortTodos field: ', field)
-      const { filteredTodos } = this
-
-      console.log('sortTodos filteredTodos: ', filteredTodos)
-
-
-      this.filteredTodos = [...filteredTodos.sort((a, b) => a[field] - b[field])]
-      // Sort todos by the given field
-      // Update the sortField and sortAsc variables
-      // Update the filteredTodos array to reflect the sorting
+      const { filteredPosttype } = this
+      console.log('sortTodos filteredPosttype: ', filteredPosttype)
+      this.filteredPosttype = [...filteredPosttype.sort((a, b) => a[field] - b[field])]
     },
     toggleSortOrder() {
       this.sortAsc = !this.sortAsc;
-      // Update the filteredTodos array to reflect the updated sort order
+      // Update the filteredPosttype array to reflect the updated sort order
     },
-    editTodo(todoId) {
-      this.$router.push(`/todos/${todoId}`);
+    editPosttype(posttypeId) {
+      this.$router.push(`/${API_PATH_SLUG}/${posttypeId}`);
     },
-    async deleteTodo(todoId) {
-      await axios.delete(`/apis/todos/${todoId}`)
+    async deletePosttype(posttypeId) {
+      await axios.delete(`/apis/${API_PATH_SLUG}/${posttypeId}`)
       window.location.reload();
     },
     prevPage() {
@@ -165,7 +160,7 @@ export default {
       const confirmCreation = confirm(`Confirm creation of category "${categoryName}"?`);
       if (!confirmCreation) return
 
-      await axios.post('/apis/todos/category', { name: categoryName })
+      await axios.post(`/apis/${API_PATH_SLUG}/category`, { name: categoryName} )
       window.location.reload();
     },
     async removeCategory () {
@@ -175,18 +170,18 @@ export default {
       const confirmCreation = confirm(`Confirm delete of category "${categoryName}"?`);
       if (!confirmCreation) return
 
-      await axios.delete('/apis/todos/category', { data: { name: categoryName }})
+      await axios.delete(`/apis/${API_PATH_SLUG}/category', { data: { name: categoryName }`)
       window.location.reload();
     }
   },
   computed: {
     totalPages() {
-      return Math.ceil(this.filteredTodos.length / this.pageSize);
+      return Math.ceil(this.filteredPosttype.length / this.pageSize);
     },
-    paginatedTodos() {
+    pagination() {
       const startIndex = (this.currentPage - 1) * this.pageSize;
       const endIndex = startIndex + this.pageSize;
-      return this.filteredTodos.slice(startIndex, endIndex);
+      return this.filteredPosttype.slice(startIndex, endIndex);
     }
   }
 };

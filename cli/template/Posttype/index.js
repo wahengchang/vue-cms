@@ -3,7 +3,7 @@ const {SYSTEM_KEY, POSTYPE_NAME} = require('./const')
 const router = express.Router();
 const PosttypeModel = require('./model/Posttype');
 const CategoryModel = require('./model/Category');
-const {normalizeRequestBody} = require('../../utils/modelUtils')
+const {normalizeRequestBody} = require('../../../utils/modelUtils')
 
 router.use('/category', require('./category'))
 

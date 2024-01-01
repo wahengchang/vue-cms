@@ -4,6 +4,7 @@ import FormLayout from '../layouts/FormLayout.vue'
 import axios from 'axios'
 import store from '../store'
 
+import PosttypeRouter from '../views/Posttype/router'
 const routes = [
   {
     path: '/',
@@ -41,24 +42,7 @@ const routes = [
     meta: {auth: 'requiredLogin', layout: CmsLayout},
     component: () => import('../views/MeView.vue')
   },
-  {
-    path: '/todos/create',
-    name: 'todoCreate',
-    meta: {auth: 'requiredLogin', layout: CmsLayout},
-    component: () => import('../views/Todos/CreateView.vue')
-  },
-  {
-    path: '/todos/:id',
-    name: 'todoDetail',
-    meta: {auth: 'requiredLogin', layout: CmsLayout},
-    component: () => import('../views/Todos/DetailView.vue')
-  },
-  {
-    path: '/todos',
-    name: 'todoList',
-    meta: {auth: 'requiredLogin', layout: CmsLayout},
-    component: () => import('../views/Todos/ListView.vue')
-  },
+  ...PosttypeRouter
 ]
 
 const router = createRouter({
