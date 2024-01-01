@@ -4,6 +4,50 @@ const fs = require('fs');
 
 const backToMainMenu = require('../backToMainMenu');
 
+function replacePatternsInFiles(folderPath, replacements) {
+  try {
+    // Read the contents of the folder
+    const files = fs.readdirSync(folderPath);
+
+    // Iterate through files and subdirectories
+    for (const file of files) {
+      const filePath = path.join(folderPath, file);
+
+      // Check if it's a directory
+      if (fs.statSync(filePath).isDirectory()) {
+        // Recursively process subdirectory
+        replacePatternsInFiles(filePath, replacements);
+      } else {
+        // Process file content
+        replacePatternsInFile(filePath, replacements);
+      }
+    }
+
+    console.log(`Patterns replaced successfully in folder: ${folderPath}`);
+  } catch (err) {
+    console.error(`Error replacing patterns in folder: ${folderPath}`, err);
+  }
+}
+
+function replacePatternsInFile(filePath, replacements) {
+  try {
+    // Read the file content
+    let content = fs.readFileSync(filePath, 'utf-8');
+
+    // Replace patterns with corresponding variables
+    for (const [pattern, variable] of Object.entries(replacements)) {
+      const regex = new RegExp(pattern, 'g');
+      content = content.replace(regex, variable);
+    }
+
+    // Write the modified content back to the file
+    fs.writeFileSync(filePath, content, 'utf-8');
+  } catch (err) {
+    console.error(`Error replacing patterns in file: ${filePath}`, err);
+  }
+}
+
+
 async function copyFiles(src, dest) {
   try {    
     const files = fs.readdirSync(src);
@@ -20,8 +64,6 @@ async function copyFiles(src, dest) {
         await fs.copyFileSync(srcPath, destPath);
       }
     }
-
-    console.log('Files copied successfully.');
   } catch (err) {
     console.error('Error copying files:', err);
   }
@@ -61,13 +103,27 @@ const generatePostType = async () => {
     return
   }
 
-  const templateFolder = path.resolve(__dirname, '../template/Posttype')
-  const targetDestination = path.resolve(__dirname, `../../server/routers/posttype/${posttypeName}`)
+  // server model
+  const templateServerFolder = path.resolve(__dirname, '../template/Posttype')
+  const targetServerDestination = path.resolve(__dirname, `../../server/routers/posttype/${posttypeName}`)
+  fs.mkdirSync(targetServerDestination);
+  await copyFiles(templateServerFolder, targetServerDestination);
+  console.log('Files copied server successfully.');
+  replacePatternsInFiles(targetServerDestination, {
+    '%POSTYPE_NAME%': posttypeName,
+  });
+  console.log('%POSTYPE_NAME% replace server successfully.');
 
+  // client model
+  const templateFolder = path.resolve(__dirname, '../template/VueClient')
+  const targetDestination = path.resolve(__dirname, `../../client/src/views/Posttype/${posttypeName}`)
   fs.mkdirSync(targetDestination);
-
-  // deleteFolderIfExistsSync(targetDestination)
   await copyFiles(templateFolder, targetDestination);
+  console.log('Files copied client successfully.');
+  replacePatternsInFiles(targetDestination, {
+    '%POSTYPE_NAME%': posttypeName,
+  });
+  console.log('%POSTYPE_NAME% replace client successfully.');
 
   await backToMainMenu();
 };

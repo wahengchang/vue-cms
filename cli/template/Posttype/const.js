@@ -4,7 +4,7 @@ const SYSTEM_KEY = [
     'updatedAt',
 ]
 
-const POSTYPE_NAME = 'Todo'
+const POSTYPE_NAME = '%POSTYPE_NAME%'
 
 module.exports = {
     SYSTEM_KEY,
