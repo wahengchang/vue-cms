@@ -4,19 +4,16 @@
       <v-col>
         <v-row class="mb-2">
           <v-col>
-            <h1>{{POSTYPE_NAME}} List</h1>
+            <h1>{{ POSTYPE_NAME }} List</h1>
           </v-col>
         </v-row>
         <v-row class="mb-2">
           <v-btn @click="filterByCategory('')">All</v-btn>
-          
-          <v-btn v-for="category in categories"
-            :key="category._id"
-            @click="filterByCategory(category._id)"
+          <v-btn v-for="category in categories" :key="category._id" @click="filterByCategory(category._id)"
             class="text-lowercase">
             {{ category.name }}
           </v-btn>
-          
+
           <v-btn @click="addCategory" color="yellow" fab dark>
             <v-icon>mdi-plus</v-icon>
           </v-btn>
@@ -25,6 +22,10 @@
           </v-btn>
           <v-spacer></v-spacer> <!-- This spacer will push the "Create" button to the right -->
 
+          <csv-upload
+            :urlApi="`/apis/${API_PATH_SLUG}/upload-csv`"
+          />
+
           <router-link :to="`/${API_PATH_SLUG}/create`">
             <v-btn @click="navigateToCreate" color="red" fab dark>
               <v-icon>mdi-plus</v-icon>
@@ -32,7 +33,14 @@
           </router-link>
         </v-row>
         <v-row class="mb-2">
-          <v-data-table :headers="headers" :items="filteredPosttype">
+          <v-data-table
+            v-model:sort-by="sortBy"
+            v-model:page="page"
+
+            :headers="headers"
+            :items="filteredPosttype"
+            :items-per-page="pageSize"
+          >
             <template v-slot:[`item.actions`]="{ item }">
               <v-btn @click="editPosttype(item._id)" icon color="blue">
                 <v-icon>mdi-pencil</v-icon>
@@ -41,14 +49,17 @@
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
+
+
+            <template v-slot:bottom>
+              <div class="text-center pt-2">
+                <v-pagination
+                  v-model="page"
+                  :length="pageCount"
+                ></v-pagination>
+              </div>
+            </template>
           </v-data-table>
-        </v-row>
-        <v-row class="mb-2">
-          <v-btn @click="toggleSortOrder()">Sort {{ sortAsc ? 'Descending' : 'Ascending' }}</v-btn>
-        </v-row>
-        <v-row>
-          <v-btn @click="prevPage" :disabled="currentPage === 1">Previous</v-btn>
-          <v-btn @click="nextPage" :disabled="currentPage === totalPages">Next</v-btn>
         </v-row>
       </v-col>
     </v-row>
@@ -57,19 +68,23 @@
 
 <script>
 import axios from 'axios'
-import {POSTYPE_NAME, API_PATH_SLUG} from './const'
+import { POSTYPE_NAME, API_PATH_SLUG } from './const'
+import CsvUpload from '../../../components/CsvUpload.vue';
+
 export default {
+  components: {
+    CsvUpload,
+  },
   data() {
     return {
-      posttypes: [], 
-      categories: [], 
-      filteredPosttype: [], 
-      sortField: '', 
-      sortAsc: true, 
-      currentPage: 1, 
-      pageSize: 10, 
+      posttypes: [],
+      categories: [],
+      filteredPosttype: [],
+      pageSize: 10,
+      page: 1,
       POSTYPE_NAME,
       API_PATH_SLUG,
+      sortBy: [{ key: 'createdAt', order: 'desc' }],
       headers: [
         { title: 'Title', key: 'title' },
         { title: 'Category', key: 'category.value' },
@@ -106,38 +121,12 @@ export default {
       const res = await axios.get(`/apis/${API_PATH_SLUG}/category/all`)
       this.categories = [...res.data.allCategory]
     },
-    filterByCategory(categoryId) {
-      this.$router.push({
-        path: `/${POSTYPE_NAME}`,
-        query: {category: categoryId}
-      });
-    },
-    sortTodos(field) {
-      console.log('sortTodos field: ', field)
-      const { filteredPosttype } = this
-      console.log('sortTodos filteredPosttype: ', filteredPosttype)
-      this.filteredPosttype = [...filteredPosttype.sort((a, b) => a[field] - b[field])]
-    },
-    toggleSortOrder() {
-      this.sortAsc = !this.sortAsc;
-      // Update the filteredPosttype array to reflect the updated sort order
-    },
     editPosttype(posttypeId) {
       this.$router.push(`/${API_PATH_SLUG}/${posttypeId}`);
     },
     async deletePosttype(posttypeId) {
       await axios.delete(`/apis/${API_PATH_SLUG}/${posttypeId}`)
       window.location.reload();
-    },
-    prevPage() {
-      if (this.currentPage > 1) {
-        this.currentPage--;
-      }
-    },
-    nextPage() {
-      if (this.currentPage < this.totalPages) {
-        this.currentPage++;
-      }
     },
     formatDate(_date) {
       const date = new Date(_date)
@@ -160,10 +149,10 @@ export default {
       const confirmCreation = confirm(`Confirm creation of category "${categoryName}"?`);
       if (!confirmCreation) return
 
-      await axios.post(`/apis/${API_PATH_SLUG}/category`, { name: categoryName} )
+      await axios.post(`/apis/${API_PATH_SLUG}/category`, { name: categoryName })
       window.location.reload();
     },
-    async removeCategory () {
+    async removeCategory() {
       const categoryName = prompt('Enter the category name:');
       if (!categoryName) return
 
@@ -175,14 +164,9 @@ export default {
     }
   },
   computed: {
-    totalPages() {
-      return Math.ceil(this.filteredPosttype.length / this.pageSize);
+    pageCount () {
+      return Math.ceil(this.posttypes.length / this.pageSize)
     },
-    pagination() {
-      const startIndex = (this.currentPage - 1) * this.pageSize;
-      const endIndex = startIndex + this.pageSize;
-      return this.filteredPosttype.slice(startIndex, endIndex);
-    }
   }
 };
 </script>
