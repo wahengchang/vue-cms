@@ -42,10 +42,9 @@ export default {
     async fetchCategories() {
       const res = await axios.get(`/apis/${API_PATH_SLUG}/category/all`);
       this.categories = [...res.data.allCategory];
-      const defaultCatId = ( this.categories[0] &&  this.categories[0]._id) || null
       this.posttype = {
         ...this.posttype,
-        category: defaultCatId,
+        category: this.categories[0]._id,
       };
     },
     createPosttype(posttype) {

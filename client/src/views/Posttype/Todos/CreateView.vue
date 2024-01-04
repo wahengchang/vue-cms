@@ -4,7 +4,7 @@
     <v-row>
       <v-col>
         <post-type-form
-          form-title="Create {{ POSTYPE_NAME }}"
+          :form-title="`Create ${POSTYPE_NAME}`"
           submit-button-text="Create"
           :posttype="posttype"
           :categories="categories"

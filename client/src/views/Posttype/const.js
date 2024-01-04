@@ -1,3 +1,3 @@
 export const listOfPosttype = [
-    'Todos',
+    'Todos', 'Xoo'
 ]

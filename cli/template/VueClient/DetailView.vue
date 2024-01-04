@@ -53,10 +53,10 @@ export default {
       const { title, description, category } = res.data[POSTYPE_NAME];
       this.posttype = { title, description, category };
     },
-    async editPosttype(updatedPosttype) {
+    async editPosttype() {
       const { id } = this.$route.params
 
-      axios.put(`/apis/${API_PATH_SLUG}/${id}`, updatedPosttype)
+      axios.put(`/apis/${API_PATH_SLUG}/${id}`, this.posttype)
         .then(() => {
           this.$router.push(`/${API_PATH_SLUG}`);
         })

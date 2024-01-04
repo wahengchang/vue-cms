@@ -137,7 +137,7 @@ router.get('/', async (req, res) => {
 
     const options = {
       skip: offset ? parseInt(offset) : 0,
-      limit: limit ? parseInt(limit) : 100,
+      limit: limit ? parseInt(limit) : 1000,
     };
 
     const exsistedPosttypeList = await PosttypeModel.find(query).skip(options.skip).limit(options.limit);

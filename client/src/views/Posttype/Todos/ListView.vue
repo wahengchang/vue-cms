@@ -8,44 +8,30 @@
           </v-col>
         </v-row>
         <v-row class="mb-2">
-          <v-btn @click="filterByCategory('')">All</v-btn>
-          <v-btn v-for="category in categories" :key="category._id" @click="filterByCategory(category._id)"
-            class="text-lowercase">
-            {{ category.name }}
-          </v-btn>
-
-          <v-btn @click="addCategory" color="yellow" fab dark>
-            <v-icon>mdi-plus</v-icon>
-          </v-btn>
-          <v-btn @click="removeCategory" color="yellow" fab dark>
-            <v-icon>mdi-minus</v-icon>
-          </v-btn>
-          <v-spacer></v-spacer> <!-- This spacer will push the "Create" button to the right -->
-
-          <csv-upload
-            :urlApi="`/apis/${API_PATH_SLUG}/upload-csv`"
-          />
+          <v-toolbar>
+          <template v-slot:prepend>
+            <v-text-field v-model="search" prepend-inner-icon="mdi-magnify" density="compact"
+              single-line flat hide-details variant="solo-filled" label="Category" class="pa-2" style="width: 200px;"></v-text-field>
+            <v-btn icon="mdi-plus" size="x-small" class="ms-5" @click="addCategory"></v-btn>
+            <v-btn icon="mdi-minus" size="x-small" @click="removeCategory"></v-btn>
+          </template>
+          <csv-upload :urlApi="`/apis/${API_PATH_SLUG}/upload-csv`"/>
 
           <router-link :to="`/${API_PATH_SLUG}/create`">
-            <v-btn @click="navigateToCreate" color="red" fab dark>
+            <v-btn @click="navigateToCreate" color="" fab dark>
               <v-icon>mdi-plus</v-icon>
             </v-btn>
           </router-link>
+        </v-toolbar>
         </v-row>
         <v-row class="mb-2">
-          <v-data-table
-            v-model:sort-by="sortBy"
-            v-model:page="page"
-
-            :headers="headers"
-            :items="filteredPosttype"
-            :items-per-page="pageSize"
-          >
+          <v-data-table v-model:sort-by="sortBy" v-model:page="page" v-model:search="search" :headers="headers"
+            :items="filteredPosttype" :items-per-page="pageSize">
             <template v-slot:[`item.actions`]="{ item }">
-              <v-btn @click="editPosttype(item._id)" icon color="blue">
+              <v-btn @click="editPosttype(item._id)" variant="text"  color="blue">
                 <v-icon>mdi-pencil</v-icon>
               </v-btn>
-              <v-btn @click="deletePosttype(item._id)" icon color="red">
+              <v-btn @click="deletePosttype(item._id)" variant="text"  color="red">
                 <v-icon>mdi-delete</v-icon>
               </v-btn>
             </template>
@@ -53,10 +39,7 @@
 
             <template v-slot:bottom>
               <div class="text-center pt-2">
-                <v-pagination
-                  v-model="page"
-                  :length="pageCount"
-                ></v-pagination>
+                <v-pagination v-model="page" :length="pageCount"></v-pagination>
               </div>
             </template>
           </v-data-table>
@@ -77,6 +60,7 @@ export default {
   },
   data() {
     return {
+      search: '',
       posttypes: [],
       categories: [],
       filteredPosttype: [],
@@ -164,8 +148,16 @@ export default {
     }
   },
   computed: {
-    pageCount () {
+    pageCount() {
       return Math.ceil(this.posttypes.length / this.pageSize)
+    },
+    categoryOptions() {
+      if (!this.categories || !this.categories.length) return []
+
+      return this.categories.map(category => ({
+        value: category._id,
+        title: category.name,
+      }));
     },
   }
 };
